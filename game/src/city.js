@@ -232,13 +232,12 @@ export function buildCity(scene, rng, opts = {}) {
     const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.22 * s, 0.34 * s, 6 * s, 7), trunkMat);
     trunk.position.y = 3 * s; trunk.castShadow = true;
     g.add(trunk);
-    for (let i = 0; i < 7; i++) {
-      const frond = new THREE.Mesh(new THREE.PlaneGeometry(3.4 * s, 0.9 * s), frondMat);
-      const a = (i / 7) * Math.PI * 2;
-      frond.position.set(Math.cos(a) * 1.4 * s, 6.2 * s, Math.sin(a) * 1.4 * s);
-      frond.rotation.set(Math.PI / 2.6, a, 0, 'YXZ');
-      frond.rotation.y = -a;
-      frond.rotation.x = -0.5;
+    for (let i = 0; i < 6; i++) {
+      const frond = new THREE.Mesh(new THREE.PlaneGeometry(2.4 * s, 0.55 * s), frondMat);
+      const a = (i / 6) * Math.PI * 2;
+      frond.position.set(Math.cos(a) * 1.1 * s, 6.1 * s, Math.sin(a) * 1.1 * s);
+      // YXZ order: tilt first (droop), then spin around the trunk — radial crown
+      frond.rotation.set(-0.95, -a, 0, 'YXZ');
       g.add(frond);
     }
     const nuts = new THREE.Mesh(new THREE.SphereGeometry(0.35 * s, 8, 6), new THREE.MeshStandardMaterial({ color: 0x6b4a2a }));
@@ -293,7 +292,7 @@ export function buildCity(scene, rng, opts = {}) {
   spots.parcel2 = new THREE.Vector3(centers[5], 0, half + 18); // marina
   spots.parcel3 = new THREE.Vector3(lines[2], 0, centers[1]); // market corner
   spots.docks = new THREE.Vector3(lines[7], 0, centers[4]);
-  spots.beachCar = new THREE.Vector3(centers[1], 0, half + 12);
+  spots.beachCar = new THREE.Vector3(centers[1], 0, lines[7]); // parked on the beachfront road, not the sand
   spots.checkpoint = new THREE.Vector3(lines[4], 0, -half + 14);
   spots.launch = new THREE.Vector3(lines[7], 0, centers[0]);
   spots.spawn = new THREE.Vector3(lines[3] + 4, 0, centers[4]);

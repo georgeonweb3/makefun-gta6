@@ -28,7 +28,16 @@ export function applyShot(game, shot) {
   }
   if (shot === 'drive') {
     const car = cars.parked[0] || traffic.cars[0];
-    if (car) game.enterCar(car, true);
+    if (car) {
+      // stage the sedan on the road outside the diner, facing up the street
+      car.pos.set(-190, 0, -76);
+      car.heading = 0;
+      car.mesh.position.copy(car.pos);
+      car.mesh.rotation.y = 0;
+      game.enterCar(car, true);
+      // the "get to the sedan" leg is staged as done: the drive leg is the shot
+      missions.objIndex = 1;
+    }
     player.camYaw = player.inCar ? player.inCar.heading : player.camYaw;
     return;
   }
