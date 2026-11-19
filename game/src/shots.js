@@ -36,6 +36,14 @@ export function applyShot(game, shot) {
     const car = cars.parked[1] || cars.parked[0];
     if (car) game.enterCar(car, true);
     police.setStars(3, game.time);
+    // park the patrols just behind the player so the chase reads instantly
+    const behind = car ? car.pos : player.pos;
+    police.cars.forEach((pc, i) => {
+      const a = Math.PI + (i - 1) * 0.7;
+      pc.pos.set(behind.x + Math.sin(a) * (22 + i * 9), 0, behind.z + Math.cos(a) * (22 + i * 9));
+      pc.heading = Math.atan2(-(behind.x - pc.pos.x), -(behind.z - pc.pos.z));
+      pc.speed = 18;
+    });
     missions.start(2); // HOT WHEELS: evade leg shows the objective line
     missions.objIndex = 2;
     missions.showMarker();
