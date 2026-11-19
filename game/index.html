@@ -3,17 +3,86 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Block Dodger</title>
+<title>Cayo Verde — Open World Crime</title>
+<link rel="icon" href="data:,">
 <style>
-  html, body { margin: 0; height: 100%; overflow: hidden; background: #11141b; }
-  #game { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
-  /* Read aloud, never shown: the status line screen readers announce. */
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #0e1a24;
+    font-family: "Trebuchet MS", Verdana, sans-serif; color: #fff; }
+  #scene { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+  .panel { position: fixed; z-index: 5; pointer-events: none; text-shadow: 0 1px 3px rgba(0,0,0,.8); }
+  #cashBox { top: 14px; left: 16px; font-size: 26px; font-weight: bold; color: #7dff9a; }
+  #cashBox small { display: block; font-size: 12px; color: #cfe8d8; letter-spacing: 2px; }
+  #healthBar { width: 170px; height: 10px; margin-top: 6px; background: rgba(0,0,0,.55);
+    border: 1px solid rgba(255,255,255,.5); border-radius: 5px; overflow: hidden; }
+  #healthFill { height: 100%; width: 100%; background: linear-gradient(90deg,#ff5a4e,#ffb14e); }
+  #stars { top: 14px; right: 16px; font-size: 30px; letter-spacing: 4px; color: #ffd23e;
+    text-shadow: 0 0 8px rgba(0,0,0,.9); }
+  #stars .dim { color: rgba(255,255,255,.28); }
+  #objective { top: 14px; left: 50%; transform: translateX(-50%); text-align: center;
+    background: rgba(8,20,28,.72); border: 1px solid rgba(255,210,62,.6); border-radius: 8px;
+    padding: 8px 18px; max-width: 520px; }
+  #objective b { color: #ffd23e; font-size: 15px; letter-spacing: 1px; }
+  #objective div { font-size: 13px; color: #eaf6ff; margin-top: 2px; }
+  #minimap { left: 16px; bottom: 16px; border: 2px solid rgba(255,255,255,.55); border-radius: 6px;
+    background: rgba(10,24,32,.8); }
+  #speedBox { right: 16px; bottom: 16px; text-align: right; font-size: 34px; font-weight: bold; }
+  #speedBox small { display: block; font-size: 12px; color: #bfe3ff; letter-spacing: 2px; }
+  #ammoBox { right: 16px; bottom: 92px; font-size: 18px; color: #ffe9a8; text-align: right; }
+  #crosshair { left: 50%; top: 50%; transform: translate(-50%,-50%); font-size: 22px; color: #fff;
+    opacity: .9; display: none; }
+  #toast { left: 50%; bottom: 150px; transform: translateX(-50%); font-size: 19px; font-weight: bold;
+    color: #ffd23e; background: rgba(8,20,28,.75); padding: 8px 20px; border-radius: 8px; display: none; }
+  #hint { left: 50%; bottom: 24px; transform: translateX(-50%); font-size: 13px; color: #dceeff;
+    background: rgba(8,20,28,.6); padding: 5px 12px; border-radius: 6px; }
+  #radioTag { left: 16px; bottom: 206px; font-size: 13px; color: #ffd23e; }
+  .overlay { position: fixed; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(160deg, rgba(6,26,38,.82), rgba(20,60,70,.78)); }
+  .card { text-align: center; max-width: 640px; padding: 28px 36px; background: rgba(4,16,22,.85);
+    border: 2px solid #ffd23e; border-radius: 14px; }
+  .card h1 { margin: 0; font-size: 52px; letter-spacing: 4px; color: #ffd23e; }
+  .card h2 { margin: 4px 0 12px; font-size: 17px; letter-spacing: 6px; color: #7fe3ff; font-weight: normal; }
+  .card p { font-size: 15px; line-height: 1.55; color: #eaf6ff; }
+  .card .keys { font-size: 13px; color: #bfe3ff; line-height: 1.8; }
+  .card button { pointer-events: auto; cursor: pointer; margin: 10px 6px 0; padding: 12px 26px;
+    font-size: 17px; font-weight: bold; border: none; border-radius: 8px; background: #ffd23e; color: #122; }
+  .card button.alt { background: #1d5f74; color: #fff; }
+  #vaultBar { left: 50%; top: 62%; transform: translateX(-50%); width: 320px; display: none; text-align: center; }
+  #vaultFillWrap { height: 14px; background: rgba(0,0,0,.6); border: 1px solid #ffd23e; border-radius: 7px; overflow: hidden; }
+  #vaultFill { height: 100%; width: 0%; background: #ffd23e; }
   #status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 </style>
 </head>
 <body>
-<canvas id="game" aria-label="Block Dodger: move the paddle left and right to dodge falling blocks and catch coins"></canvas>
+<canvas id="scene" aria-label="Cayo Verde: open world crime game"></canvas>
+<div id="cashBox" class="panel"><small>CAYO VERDE</small>$<span id="cash">0</span><div id="healthBar"><div id="healthFill"></div></div></div>
+<div id="stars" class="panel"></div>
+<div id="objective" class="panel"><b id="missionTitle">CAYO VERDE</b><div id="missionText">Press Start to begin.</div></div>
+<canvas id="minimap" class="panel" width="180" height="180"></canvas>
+<div id="radioTag" class="panel"></div>
+<div id="speedBox" class="panel"><span id="speed">0</span><small id="speedUnit">KM/H</small></div>
+<div id="ammoBox" class="panel"></div>
+<div id="crosshair" class="panel">+</div>
+<div id="toast" class="panel"></div>
+<div id="hint" class="panel">WASD move / drive &nbsp;·&nbsp; E enter car / interact &nbsp;·&nbsp; Click or F shoot &nbsp;·&nbsp; R reload &nbsp;·&nbsp; Q radio &nbsp;·&nbsp; M mute &nbsp;·&nbsp; P pause &nbsp;·&nbsp; drag mouse to look</div>
+<div id="vaultBar" class="panel"><div>CRACKING THE VAULT — HOLD E</div><div id="vaultFillWrap"><div id="vaultFill"></div></div></div>
+<div id="menu" class="overlay"><div class="card">
+  <h1>CAYO VERDE</h1><h2>AN OPEN-WORLD CRIME STORY</h2>
+  <p>Sun, salt air and bad decisions. Lena Ferrer came back to Cayo Verde broke — and T&iacute;a Carmen,
+  the fixer who runs the old town from her caf&eacute;, has five jobs that pay. Steal cars, collect debts,
+  outrun the Verde police, and crack the Coral Bank vault. The city is yours: drive it, walk it, own it.</p>
+  <p class="keys">WASD — move / drive &nbsp;·&nbsp; SHIFT — sprint &nbsp;·&nbsp; E — enter car / talk / grab &nbsp;·&nbsp; F or CLICK — shoot<br>
+  R — reload &nbsp;·&nbsp; Q — change radio &nbsp;·&nbsp; M — mute &nbsp;·&nbsp; P — pause &nbsp;·&nbsp; drag mouse — look around</p>
+  <button id="startBtn">START THE STORY</button>
+  <button id="continueBtn" class="alt" style="display:none">CONTINUE — SAVE FOUND</button>
+  <p style="font-size:12px;color:#9fc6d8">Progress saves after every mission. Wanted stars bring the police — lose them to cool off.</p>
+</div></div>
+<div id="endScreen" class="overlay" style="display:none"><div class="card">
+  <h1 id="endTitle">BUSTED</h1><h2 id="endSub">THE VERDE POLICE GOT YOU</h2>
+  <p id="endText"></p>
+  <button id="retryBtn">BACK TO THE STREETS</button>
+</div></div>
 <p id="status" role="status" aria-live="polite"></p>
+<script type="importmap">{"imports":{"three":"./vendor/three.module.min.js"}}</script>
 <script type="module" src="./src/main.js"></script>
 </body>
 </html>
